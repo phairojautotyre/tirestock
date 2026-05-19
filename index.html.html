@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TireStock">
+<meta name="theme-color" content="#1F3864">
+<title>TireStock 2026</title>
+<style>
+:root{
+  --dark:#1F3864;--mid:#2E75B6;--orange:#C55A11;--green:#276221;
+  --light-green:#C6EFCE;--light-red:#FFC7CE;--yellow:#FFEB9C;
+  --gray:#f5f5f5;--white:#fff;--text:#222;--text2:#666;
+  --radius:12px;--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,Arial,sans-serif;background:#f0f2f5;color:var(--text);min-height:100vh;padding-bottom:calc(80px + var(--safe-bottom))}
+
+/* Top bar */
+.topbar{background:var(--dark);color:#fff;padding:54px 16px 14px;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+.topbar p{font-size:12px;opacity:.7;margin-top:2px}
+
+/* Bottom nav */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;z-index:100;padding-bottom:var(--safe-bottom)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;font-size:10px;color:var(--text2);cursor:pointer;border:none;background:none;transition:color .15s}
+.nav-btn.active{color:var(--mid)}
+.nav-btn .icon{font-size:22px;margin-bottom:2px}
+
+/* Pages */
+.page{display:none;padding:16px;min-height:calc(100vh - 140px)}
+.page.active{display:block}
+
+/* Cards */
+.card{background:#fff;border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+/* Summary grid */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.stat-card .num{font-size:24px;font-weight:700;margin-bottom:2px}
+.stat-card .lbl{font-size:11px;color:var(--text2)}
+.stat-blue .num{color:var(--mid)}
+.stat-orange .num{color:var(--orange)}
+.stat-green .num{color:#1a6b2e}
+.stat-red .num{color:#9C0006}
+
+/* List items */
+.tire-item{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tire-info{flex:1}
+.tire-name{font-size:14px;font-weight:600;color:var(--dark)}
+.tire-size{font-size:12px;color:var(--text2);margin-top:2px}
+.badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.badge-green{background:var(--light-green);color:var(--green)}
+.badge-yellow{background:var(--yellow);color:#9C5700}
+.badge-red{background:var(--light-red);color:#9C0006}
+.badge-gray{background:#eee;color:#666}
+
+/* Search bar */
+.search-bar{background:#fff;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.search-bar input{border:none;outline:none;flex:1;font-size:14px;background:transparent}
+.search-bar .search-icon{color:var(--text2);font-size:18px}
+
+/* Filters */
+.filter-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
+.filter-chip{background:#fff;border:1.5px solid #ddd;border-radius:20px;padding:6px 14px;font-size:12px;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all .15s}
+.filter-chip.active{background:var(--mid);border-color:var(--mid);color:#fff}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(80px + var(--safe-bottom) + 12px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--mid);color:#fff;border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(46,117,182,.5);z-index:90}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + var(--safe-bottom));width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:16px;color:var(--dark)}
+.modal-close{float:right;font-size:20px;color:var(--text2);cursor:pointer;background:none;border:none;padding:0}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;outline:none;background:#fff;transition:border-color .15s}
+.form-input:focus{border-color:var(--mid)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{width:100%;padding:14px;background:var(--mid);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn-primary.orange{background:var(--orange)}
+.btn-primary.green{background:#34A853}
+.btn-secondary{width:100%;padding:12px;background:#f5f5f5;color:var(--text);border:none;border-radius:12px;font-size:14px;cursor:pointer;margin-top:6px}
+
+/* Transaction list */
+.tx-item{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid #ccc;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tx-item.income{border-color:#34A853}
+.tx-item.expense{border-color:#E53935}
+.tx-item.receive{border-color:var(--mid)}
+.tx-header{display:flex;justify-content:space-between;align-items:center}
+.tx-name{font-size:13px;font-weight:600}
+.tx-amount{font-size:14px;font-weight:700}
+.tx-amount.plus{color:#1a6b2e}
+.tx-amount.minus{color:#9C0006}
+.tx-meta{font-size:11px;color:var(--text2);margin-top:3px}
+
+/* Sale page */
+.section-title{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f0f0f0}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:300;display:none;white-space:nowrap}
+.toast.show{display:block}
+
+/* Step indicator */
+.step-tabs{display:flex;gap:4px;margin-bottom:16px}
+.step-tab{flex:1;text-align:center;padding:8px 4px;font-size:11px;font-weight:600;border-radius:8px;background:#f0f0f0;color:var(--text2);cursor:pointer}
+.step-tab.active{background:var(--mid);color:#fff}
+
+/* Empty state */
+.empty{text-align:center;padding:40px 16px;color:var(--text2)}
+.empty .empty-icon{font-size:48px;margin-bottom:8px}
+.empty p{font-size:14px}
+
+/* Install banner */
+.install-banner{background:linear-gradient(135deg,var(--dark),var(--mid));color:#fff;border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.install-banner .ico{font-size:28px}
+.install-banner .txt h4{font-size:13px;font-weight:700;margin-bottom:2px}
+.install-banner .txt p{font-size:11px;opacity:.8}
+.install-banner button{margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🔧 TireStock 2026</h1>
+  <p id="topbar-sub">ระบบจัดการสต็อกยางรถยนต์</p>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottomnav">
+  <button class="nav-btn active" onclick="showPage('home')" id="nav-home">
+    <span class="icon">🏠</span>หน้าหลัก
+  </button>
+  <button class="nav-btn" onclick="showPage('stock')" id="nav-stock">
+    <span class="icon">📦</span>Stock
+  </button>
+  <button class="nav-btn" onclick="showPage('sale')" id="nav-sale">
+    <span class="icon">🛒</span>ขาย
+  </button>
+  <button class="nav-btn" onclick="showPage('account')" id="nav-account">
+    <span class="icon">💰</span>บัญชี
+  </button>
+  <button class="nav-btn" onclick="showPage('more')" id="nav-more">
+    <span class="icon">⚙️</span>เพิ่มเติม
+  </button>
+</nav>
+
+<!-- PAGE: หน้าหลัก -->
+<div class="page active" id="page-home">
+  <div class="install-banner" id="install-banner">
+    <span class="ico">📱</span>
+    <div class="txt"><h4>ติดตั้งบน iPhone</h4><p>กด Share → Add to Home Screen</p></div>
+    <button onclick="document.getElementById('install-banner').style.display='none'">ตกลง</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="stat-card stat-blue">
+      <div class="num" id="stat-total-items">24</div>
+      <div class="lbl">รุ่นยางทั้งหมด</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="num" id="stat-in-stock">18</div>
+      <div class="lbl">พร้อมขาย</div>
+    </div>
+    <div class="stat-card stat-yellow" style="--yellow-text:#9C5700">
+      <div class="num" style="color:#9C5700" id="stat-low">4</div>
+      <div class="lbl">สต็อกน้อย</div>
+    </div>
+    <div class="stat-card stat-red">
+      <div class="num" id="stat-out">2</div>
+      <div class="lbl">หมดสต็อก</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ยอดวันนี้</div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0">
+      <span style="font-size:13px;color:var(--text2)">💵 รายรับ</span>
+      <span style="font-size:14px;font-weight:700;color:#1a6b2e" id="today-income">฿ 0</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0">
+      <span style="font-size:13px;color:var(--text2)">💸 รายจ่าย</span>
+      <span style="font-size:14px;font-weight:700;color:#9C0006" id="today-expense">฿ 0</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0">
+      <span style="font-size:13px;font-weight:600">💰 กำไร</span>
+      <span style="font-size:14px;font-weight:700;color:var(--mid)" id="today-profit">฿ 0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Quick Actions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn-primary" onclick="showPage('sale');openSaleModal()">🛒 บันทึกขาย</button>
+      <button class="btn-primary" style="background:#1F3864" onclick="showPage('stock');openReceiveModal()">📋 รับยางเข้า</button>
+      <button class="btn-primary orange" onclick="openExpenseModal()">💸 บันทึกรายจ่าย</button>
+      <button class="btn-primary green" onclick="showPage('stock')">📦 ดู Stock</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">สต็อกใกล้หมด ⚠️</div>
+    <div id="low-stock-list"></div>
+  </div>
+</div>
+
+<!-- PAGE: Stock -->
+<div class="page" id="page-stock">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="stock-search" placeholder="ค้นหายี่ห้อ รุ่น ขนาด..." oninput="filterStock()">
+  </div>
+  <div class="filter-row" id="filter-row">
+    <div class="filter-chip active" onclick="setFilter(this,'all')">ทั้งหมด</div>
+    <div class="filter-chip" onclick="setFilter(this,'ready')">✅ พร้อมขาย</div>
+    <div class="filter-chip" onclick="setFilter(this,'low')">🔶 น้อย</div>
+    <div class="filter-chip" onclick="setFilter(this,'out')">❌ หมด</div>
+  </div>
+  <div id="stock-list"></div>
+  <button class="fab" onclick="openReceiveModal()" title="รับยางเข้า">+</button>
+</div>
+
+<!-- PAGE: ขาย -->
+<div class="page" id="page-sale">
+  <div class="card" style="margin-bottom:12px">
+    <button class="btn-primary orange" onclick="openSaleModal()" style="font-size:16px">🛒 บันทึกงานขายใหม่</button>
+  </div>
+  <div class="section-title">ประวัติการขายวันนี้</div>
+  <div id="sale-list"></div>
+</div>
+
+<!-- PAGE: บัญชี -->
+<div class="page" id="page-account">
+  <div class="summary-grid">
+    <div class="stat-card stat-green">
+      <div class="num" id="acc-income">฿0</div>
+      <div class="lbl">รายรับรวม</div>
+    </div>
+    <div class="stat-card stat-red">
+      <div class="num" id="acc-expense">฿0</div>
+      <div class="lbl">รายจ่ายรวม</div>
+    </div>
+  </div>
+  <div class="stat-card" style="margin-bottom:16px;text-align:center;background:#fff;border-radius:var(--radius);padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:4px">💰 กำไรสุทธิ</div>
+    <div id="acc-profit" style="font-size:28px;font-weight:700;color:var(--mid)">฿0</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="btn-primary green" style="padding:10px" onclick="openExpenseModal()">+ บันทึกรายจ่าย</button>
+  </div>
+  <div class="section-title">รายการล่าสุด</div>
+  <div id="acc-list"></div>
+</div>
+
+<!-- PAGE: เพิ่มเติม -->
+<div class="page" id="page-more">
+  <div class="card">
+    <div class="card-title">ตั้งค่าการเชื่อมต่อ Google Sheets</div>
+    <div class="form-group">
+      <label class="form-label">Google Sheets ID</label>
+      <input class="form-input" id="sheets-id" placeholder="ใส่ ID จาก URL ของ Google Sheets" value="">
+    </div>
+    <div class="form-group">
+      <label class="form-label">API Key (Google Sheets API)</label>
+      <input class="form-input" id="api-key" type="password" placeholder="AIza...">
+    </div>
+    <button class="btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
+    <button class="btn-primary" style="background:#34A853;margin-top:8px" onclick="testConnection()">🔗 ทดสอบการเชื่อมต่อ</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">วิธีใช้งาน</div>
+    <div style="font-size:13px;line-height:1.8;color:var(--text2)">
+      <p>1. ติดตั้ง: กด Share → Add to Home Screen บน iPhone</p>
+      <p>2. ตั้งค่า: ใส่ Google Sheets ID และ API Key</p>
+      <p>3. ข้อมูลจะ sync กับ Google Sheets อัตโนมัติ</p>
+      <p>4. ใช้งานได้ offline (ข้อมูลเก็บในเครื่อง)</p>
+      <hr style="margin:10px 0;border:none;border-top:1px solid #eee">
+      <p><strong>DOT format:</strong> 4 หลัก เช่น 2426 = สัปดาห์24 ปี2026</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ข้อมูลแอป</div>
+    <div style="font-size:13px;line-height:2;color:var(--text2)">
+      <div style="display:flex;justify-content:space-between"><span>เวอร์ชัน</span><span>6.0.0</span></div>
+      <div style="display:flex;justify-content:space-between"><span>อัปเดตล่าสุด</span><span>20 พ.ค. 2026</span></div>
+      <div style="display:flex;justify-content:space-between"><span>รายการในเครื่อง</span><span id="local-count">0</span></div>
+    </div>
+    <button class="btn-secondary" style="margin-top:10px;color:#9C0006" onclick="clearData()">🗑 ล้างข้อมูลทั้งหมด</button>
+  </div>
+</div>
+
+<!-- MODAL: บันทึกขาย -->
+<div class="modal-overlay" id="modal-sale" onclick="closeModal('modal-sale')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-sale')">✕</button>
+    <div class="modal-title">🛒 บันทึกงานขาย</div>
+    <div class="form-group">
+      <label class="form-label">📅 วันที่</label>
+      <input class="form-input" type="date" id="sale-date">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ยี่ห้อ *</label>
+        <select class="form-input" id="sale-brand" onchange="loadSaleModels()">
+          <option value="">เลือก...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รุ่น *</label>
+        <select class="form-input" id="sale-model" onchange="loadSaleSizes()">
+          <option value="">เลือกยี่ห้อก่อน</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ขนาดยาง *</label>
+      <select class="form-input" id="sale-size" onchange="checkSaleStock()">
+        <option value="">เลือกรุ่นก่อน</option>
+      </select>
+      <div id="sale-stock-info" style="font-size:12px;margin-top:4px;padding:6px 10px;border-radius:6px;display:none"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">จำนวน *</label>
+        <input class="form-input" type="number" id="sale-qty" min="1" placeholder="4" oninput="calcSaleTotal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคา/เส้น ฿ *</label>
+        <input class="form-input" type="number" id="sale-price" placeholder="0" oninput="calcSaleTotal()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">รวม</label>
+      <input class="form-input" id="sale-total" readonly style="font-size:18px;font-weight:700;color:var(--orange);background:#fff8f0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อลูกค้า</label>
+      <input class="form-input" id="sale-customer" placeholder="นาย / บริษัท">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ทะเบียนรถ</label>
+        <input class="form-input" id="sale-plate" placeholder="กข 1234">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ผู้ขาย</label>
+        <select class="form-input" id="sale-staff">
+          <option value="">-</option>
+          <option>สมชาย</option><option>สมหญิง</option><option>สมศักดิ์</option>
+          <option>นภา</option><option>วิชัย</option><option>ปิยะ</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">เลขใบเสร็จ</label>
+      <input class="form-input" id="sale-inv" placeholder="RCP-2026-001">
+    </div>
+    <button class="btn-primary orange" onclick="submitSale()">🛒 บันทึกขาย + ตัด Stock</button>
+    <button class="btn-secondary" onclick="closeModal('modal-sale')">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- MODAL: รับยางเข้า -->
+<div class="modal-overlay" id="modal-receive" onclick="closeModal('modal-receive')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-receive')">✕</button>
+    <div class="modal-title">📋 รับยางเข้าคลัง</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">📅 วันที่</label>
+        <input class="form-input" type="date" id="recv-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ผู้บันทึก</label>
+        <select class="form-input" id="recv-staff">
+          <option value="">-</option>
+          <option>สมชาย</option><option>สมหญิง</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ยี่ห้อ *</label>
+        <select class="form-input" id="recv-brand" onchange="loadRecvModels()">
+          <option value="">เลือก...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รุ่น *</label>
+        <select class="form-input" id="recv-model">
+          <option value="">เลือกยี่ห้อก่อน</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ขนาดยาง *</label>
+      <select class="form-input" id="recv-size">
+        <option value="">เลือกรุ่นก่อน</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">จำนวน *</label>
+        <input class="form-input" type="number" id="recv-qty" min="1" placeholder="4">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคาทุน/เส้น ฿</label>
+        <input class="form-input" type="number" id="recv-cost" placeholder="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">DOT (4 หลัก)</label>
+        <input class="form-input" id="recv-dot" placeholder="2426" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เลขใบเสร็จ</label>
+        <input class="form-input" id="recv-inv" placeholder="INV-001">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="submitReceive()">💾 บันทึกรับยางเข้า</button>
+    <button class="btn-secondary" onclick="closeModal('modal-receive')">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- MODAL: รายจ่าย -->
+<div class="modal-overlay" id="modal-expense" onclick="closeModal('modal-expense')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-expense')">✕</button>
+    <div class="modal-title">💸 บันทึกรายจ่าย</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">📅 วันที่</label>
+        <input class="form-input" type="date" id="exp-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ผู้ใช้จ่าย</label>
+        <select class="form-input" id="exp-staff">
+          <option value="">-</option>
+          <option>สมชาย</option><option>สมหญิง</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อรายการ *</label>
+      <input class="form-input" id="exp-name" placeholder="เช่น ค่าน้ำมัน, ค่าเช่า">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ประเภท</label>
+        <select class="form-input" id="exp-cat">
+          <option>ต้นทุนสินค้า</option><option>ค่าเช่า</option>
+          <option>ค่าน้ำมัน</option><option>ค่าแรงงาน</option>
+          <option>ค่าสาธารณูปโภค</option><option>ค่าซ่อมบำรุง</option>
+          <option>อื่นๆ</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">จำนวนเงิน ฿ *</label>
+        <input class="form-input" type="number" id="exp-amount" placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">หมายเหตุ</label>
+      <input class="form-input" id="exp-note" placeholder="">
+    </div>
+    <button class="btn-primary" style="background:#C62828" onclick="submitExpense()">💸 บันทึกรายจ่าย</button>
+    <button class="btn-secondary" onclick="closeModal('modal-expense')">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Data (local storage) ────────────────────────────────
+var DB = {
+  stock: [],
+  transactions: [],
+  sales: [],
+  accounts: []
+};
+
+var SAMPLE_STOCK = [
+  {id:1,brand:"Bridgestone",model:"Ecopia EP300",size:"195/65R15",width:195,aspect:65,rim:15,qty:4,cost:2900,status:"🔶 น้อย"},
+  {id:2,brand:"Bridgestone",model:"Turanza T005A",size:"205/55R16",width:205,aspect:55,rim:16,qty:6,cost:3400,status:"✅ พร้อมขาย"},
+  {id:3,brand:"Bridgestone",model:"Potenza Sport",size:"225/45R17",width:225,aspect:45,rim:17,qty:4,cost:6500,status:"🔶 น้อย"},
+  {id:4,brand:"Michelin",model:"Energy XM2+",size:"185/65R15",width:185,aspect:65,rim:15,qty:6,cost:2700,status:"✅ พร้อมขาย"},
+  {id:5,brand:"Michelin",model:"Pilot Sport 4",size:"225/45R17",width:225,aspect:45,rim:17,qty:4,cost:6200,status:"🔶 น้อย"},
+  {id:6,brand:"Michelin",model:"Primacy 4+",size:"205/55R16",width:205,aspect:55,rim:16,qty:6,cost:4200,status:"✅ พร้อมขาย"},
+  {id:7,brand:"Yokohama",model:"BluEarth GT AE51",size:"195/65R15",width:195,aspect:65,rim:15,qty:6,cost:2600,status:"✅ พร้อมขาย"},
+  {id:8,brand:"Yokohama",model:"Advan Sport V105",size:"245/40R18",width:245,aspect:40,rim:18,qty:4,cost:8200,status:"🔶 น้อย"},
+  {id:9,brand:"Dunlop",model:"SP Sport Maxx 050",size:"215/60R16",width:215,aspect:60,rim:16,qty:4,cost:3100,status:"🔶 น้อย"},
+  {id:10,brand:"Dunlop",model:"Direzza DZ102",size:"225/45R17",width:225,aspect:45,rim:17,qty:4,cost:4500,status:"🔶 น้อย"},
+  {id:11,brand:"Continental",model:"PremiumContact 7",size:"205/55R16",width:205,aspect:55,rim:16,qty:6,cost:4800,status:"✅ พร้อมขาย"},
+  {id:12,brand:"Goodyear",model:"EfficientGrip Performance 2",size:"195/65R15",width:195,aspect:65,rim:15,qty:8,cost:2800,status:"✅ พร้อมขาย"},
+  {id:13,brand:"Pirelli",model:"Cinturato P7 C2",size:"205/55R16",width:205,aspect:55,rim:16,qty:4,cost:4800,status:"🔶 น้อย"},
+  {id:14,brand:"Pirelli",model:"P Zero PZ4",size:"275/35R19",width:275,aspect:35,rim:19,qty:3,cost:13500,status:"🔶 น้อย"},
+  {id:15,brand:"Hankook",model:"Kinergy Eco2 K435",size:"185/65R15",width:185,aspect:65,rim:15,qty:8,cost:1900,status:"✅ พร้อมขาย"},
+  {id:16,brand:"Hankook",model:"Ventus S1 Evo3 K127",size:"225/40R18",width:225,aspect:40,rim:18,qty:8,cost:5800,status:"✅ พร้อมขาย"},
+  {id:17,brand:"Nexen",model:"N'Blue HD Plus",size:"185/65R15",width:185,aspect:65,rim:15,qty:4,cost:1500,status:"🔶 น้อย"},
+  {id:18,brand:"Maxxis",model:"MAP3 Premitra",size:"195/65R15",width:195,aspect:65,rim:15,qty:8,cost:1700,status:"✅ พร้อมขาย"},
+  {id:19,brand:"Toyo",model:"Proxes CF2",size:"195/60R15",width:195,aspect:60,rim:15,qty:4,cost:2400,status:"🔶 น้อย"},
+  {id:20,brand:"Laufenn",model:"S FIT EQ+",size:"195/65R15",width:195,aspect:65,rim:15,qty:4,cost:1400,status:"🔶 น้อย"},
+  {id:21,brand:"Falken",model:"Ziex ZE914",size:"205/55R16",width:205,aspect:55,rim:16,qty:0,cost:2600,status:"❌ หมด"},
+  {id:22,brand:"Kumho",model:"Ecsta PS71",size:"225/45R17",width:225,aspect:45,rim:17,qty:4,cost:3800,status:"🔶 น้อย"},
+  {id:23,brand:"Continental",model:"SportContact 7",size:"235/45R17",width:235,aspect:45,rim:17,qty:6,cost:7200,status:"✅ พร้อมขาย"},
+  {id:24,brand:"Goodyear",model:"Eagle F1 Asymmetric 6",size:"245/40R18",width:245,aspect:40,rim:18,qty:0,cost:9000,status:"❌ หมด"},
+];
+
+var SAMPLE_ACCOUNTS = [
+  {id:1,date:"15/01/2026",type:"รายรับ",name:"ขายยาง Bridgestone Ecopia x4 (นาย สมพร)",amount:14400,cat:"รายรับจากขายยาง",staff:"สมหญิง"},
+  {id:2,date:"16/01/2026",type:"รายรับ",name:"ขายยาง Michelin Energy XM2+ x4 (นาง มาลี)",amount:13600,cat:"รายรับจากขายยาง",staff:"สมชาย"},
+  {id:3,date:"22/01/2026",type:"รายรับ",name:"ขายยาง Hankook Kinergy x4 (นาย วิชัย)",amount:9600,cat:"รายรับจากขายยาง",staff:"สมหญิง"},
+  {id:4,date:"01/02/2026",type:"รายจ่าย",name:"ค่าเช่าร้านเดือนมกราคม",amount:15000,cat:"ค่าเช่า",staff:"สมชาย"},
+  {id:5,date:"01/02/2026",type:"รายจ่าย",name:"ค่าน้ำค่าไฟเดือนมกราคม",amount:3200,cat:"ค่าสาธารณูปโภค",staff:"สมชาย"},
+];
+
+// ── Init ────────────────────────────────────────────────
+function init() {
+  var saved = localStorage.getItem('tirestock_db');
+  if (saved) { try { DB = JSON.parse(saved); } catch(e){} }
+  if (!DB.stock || DB.stock.length===0) DB.stock = SAMPLE_STOCK;
+  if (!DB.accounts) DB.accounts = [];
+  if (DB.accounts.length===0) DB.accounts = SAMPLE_ACCOUNTS;
+  if (!DB.sales) DB.sales = [];
+  if (!DB.transactions) DB.transactions = [];
+
+  var today = new Date();
+  var fmt = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+  ["sale-date","recv-date","exp-date"].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=fmt; });
+
+  renderHome();
+  renderStock();
+  renderSale();
+  renderAccount();
+  populateBrands();
+  loadSettings();
+  document.getElementById("local-count").textContent = DB.stock.length;
+}
+
+function saveDB() { localStorage.setItem('tirestock_db', JSON.stringify(DB)); }
+
+// ── Navigation ──────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  document.getElementById('topbar-sub').textContent = {
+    home:'ระบบจัดการสต็อกยางรถยนต์',
+    stock:'คลังยางทั้งหมด',
+    sale:'บันทึกงานขาย',
+    account:'บัญชีรายรับ-รายจ่าย',
+    more:'ตั้งค่าและข้อมูล'
+  }[name] || '';
+}
+
+// ── Modal ───────────────────────────────────────────────
+function openSaleModal() { document.getElementById('modal-sale').classList.add('open'); }
+function openReceiveModal() { document.getElementById('modal-receive').classList.add('open'); }
+function openExpenseModal() { document.getElementById('modal-expense').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── Render Home ─────────────────────────────────────────
+function renderHome() {
+  var ready=0,low=0,out=0;
+  DB.stock.forEach(function(t){
+    if(t.qty>5) ready++;
+    else if(t.qty>0) low++;
+    else out++;
+  });
+  document.getElementById('stat-total-items').textContent = DB.stock.length;
+  document.getElementById('stat-in-stock').textContent = ready;
+  document.getElementById('stat-low').textContent = low;
+  document.getElementById('stat-out').textContent = out;
+
+  var today = new Date().toLocaleDateString('th-TH').replace(/\//g,'/');
+  var todayFmt = formatDateTH(new Date());
+  var income=0,expense=0;
+  DB.accounts.forEach(function(a){
+    if(a.date===todayFmt){
+      if(a.type==="รายรับ") income+=a.amount;
+      else expense+=a.amount;
+    }
+  });
+  document.getElementById('today-income').textContent = '฿ '+income.toLocaleString('th-TH');
+  document.getElementById('today-expense').textContent = '฿ '+expense.toLocaleString('th-TH');
+  document.getElementById('today-profit').textContent = '฿ '+(income-expense).toLocaleString('th-TH');
+
+  var lowItems = DB.stock.filter(function(t){return t.qty>0&&t.qty<=5;});
+  var html = lowItems.length===0 ? '<div class="empty"><p>ไม่มียางที่สต็อกน้อย 🎉</p></div>' : '';
+  lowItems.slice(0,5).forEach(function(t){
+    html+='<div class="tire-item"><div class="tire-info"><div class="tire-name">'+t.brand+' '+t.model+'</div><div class="tire-size">'+t.size+'</div></div><span class="badge badge-yellow">เหลือ '+t.qty+' เส้น</span></div>';
+  });
+  document.getElementById('low-stock-list').innerHTML = html;
+}
+
+// ── Render Stock ────────────────────────────────────────
+var currentFilter = 'all';
+function renderStock(query) {
+  query = (query||'').toLowerCase();
+  var html = '';
+  DB.stock.forEach(function(t){
+    var matchSearch = !query || (t.brand+' '+t.model+' '+t.size).toLowerCase().indexOf(query)!==-1;
+    var matchFilter = currentFilter==='all' ||
+      (currentFilter==='ready'&&t.qty>5) ||
+      (currentFilter==='low'&&t.qty>0&&t.qty<=5) ||
+      (currentFilter==='out'&&t.qty===0);
+    if(!matchSearch||!matchFilter) return;
+    var bc = t.qty>5?'badge-green':t.qty>0?'badge-yellow':'badge-red';
+    var bl = t.qty>5?'✅ '+t.qty+' เส้น':t.qty>0?'🔶 '+t.qty+' เส้น':'❌ หมด';
+    html += '<div class="tire-item" onclick="showTireDetail('+t.id+')">' +
+      '<div class="tire-info"><div class="tire-name">'+t.brand+' '+t.model+'</div>' +
+      '<div class="tire-size">'+t.size+' | ทุน: ฿'+t.cost.toLocaleString('th-TH')+'</div></div>' +
+      '<span class="badge '+bc+'">'+bl+'</span></div>';
+  });
+  if(!html) html='<div class="empty"><div class="empty-icon">🔍</div><p>ไม่พบยางที่ค้นหา</p></div>';
+  document.getElementById('stock-list').innerHTML = html;
+}
+
+function filterStock() { renderStock(document.getElementById('stock-search').value); }
+function setFilter(el,type) {
+  document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active'); currentFilter=type; filterStock();
+}
+
+function showTireDetail(id) {
+  var t = DB.stock.find(function(x){return x.id===id;});
+  if(!t) return;
+  var msg = t.brand+' '+t.model+'\nขนาด: '+t.size+'\nคงเหลือ: '+t.qty+' เส้น\nราคาทุน: ฿'+t.cost.toLocaleString('th-TH');
+  alert(msg);
+}
+
+// ── Render Sale ─────────────────────────────────────────
+function renderSale() {
+  var html = '';
+  var items = DB.sales.slice().reverse();
+  if(items.length===0) html='<div class="empty"><div class="empty-icon">🛒</div><p>ยังไม่มีรายการขาย</p></div>';
+  items.forEach(function(s){
+    html+='<div class="tx-item income">' +
+      '<div class="tx-header"><span class="tx-name">'+s.brand+' '+s.model+'</span><span class="tx-amount plus">+฿'+s.total.toLocaleString('th-TH')+'</span></div>' +
+      '<div class="tx-meta">'+s.size+' × '+s.qty+' เส้น | '+s.date+(s.customer?' | '+s.customer:'')+'</div></div>';
+  });
+  document.getElementById('sale-list').innerHTML = html;
+}
+
+// ── Render Account ──────────────────────────────────────
+function renderAccount() {
+  var income=0,expense=0;
+  DB.accounts.forEach(function(a){ if(a.type==="รายรับ") income+=a.amount; else expense+=a.amount; });
+  document.getElementById('acc-income').textContent = '฿'+income.toLocaleString('th-TH');
+  document.getElementById('acc-expense').textContent = '฿'+expense.toLocaleString('th-TH');
+  document.getElementById('acc-profit').textContent = '฿'+(income-expense).toLocaleString('th-TH');
+
+  var html='';
+  var items = DB.accounts.slice().reverse().slice(0,20);
+  items.forEach(function(a){
+    var cls=a.type==="รายรับ"?"income":"expense";
+    var sign=a.type==="รายรับ"?"+":"-";
+    html+='<div class="tx-item '+cls+'">' +
+      '<div class="tx-header"><span class="tx-name" style="font-size:12px">'+a.name+'</span>' +
+      '<span class="tx-amount '+(a.type==="รายรับ"?"plus":"minus")+'">'+sign+'฿'+a.amount.toLocaleString('th-TH')+'</span></div>' +
+      '<div class="tx-meta">'+a.date+' | '+a.cat+(a.staff?' | '+a.staff:'')+'</div></div>';
+  });
+  if(!html) html='<div class="empty"><div class="empty-icon">💰</div><p>ยังไม่มีรายการ</p></div>';
+  document.getElementById('acc-list').innerHTML = html;
+}
+
+// ── Populate Brands ─────────────────────────────────────
+function populateBrands() {
+  var brands = [...new Set(DB.stock.map(function(t){return t.brand;}))].sort();
+  ['sale-brand','recv-brand'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.innerHTML='<option value="">เลือก...</option>';
+    brands.forEach(function(b){el.innerHTML+='<option>'+b+'</option>';});
+  });
+}
+
+// Model/size cascade
+function getModelMap() {
+  var map={};
+  DB.stock.forEach(function(t){
+    if(!map[t.brand]) map[t.brand]={};
+    if(!map[t.brand][t.model]) map[t.brand][t.model]=[];
+    if(map[t.brand][t.model].indexOf(t.size)===-1) map[t.brand][t.model].push(t.size);
+  });
+  return map;
+}
+
+function loadSaleModels() {
+  var b=document.getElementById('sale-brand').value;
+  var map=getModelMap();
+  var el=document.getElementById('sale-model');
+  el.innerHTML='<option value="">เลือก...</option>';
+  if(map[b]) Object.keys(map[b]).sort().forEach(function(m){el.innerHTML+='<option>'+m+'</option>';});
+  document.getElementById('sale-size').innerHTML='<option value="">เลือกรุ่นก่อน</option>';
+}
+function loadSaleSizes() {
+  var b=document.getElementById('sale-brand').value,m=document.getElementById('sale-model').value;
+  var map=getModelMap();
+  var el=document.getElementById('sale-size');
+  el.innerHTML='<option value="">เลือก...</option>';
+  if(map[b]&&map[b][m]) map[b][m].forEach(function(s){el.innerHTML+='<option>'+s+'</option>';});
+}
+function checkSaleStock() {
+  var b=document.getElementById('sale-brand').value,m=document.getElementById('sale-model').value,s=document.getElementById('sale-size').value;
+  var tire=DB.stock.find(function(t){return t.brand===b&&t.model===m&&t.size===s;});
+  var info=document.getElementById('sale-stock-info');
+  if(tire){
+    info.style.display='block';
+    info.style.background=tire.qty>0?'#f0fff0':'#fff0f0';
+    info.style.color=tire.qty>0?'#276221':'#9C0006';
+    info.textContent='คงเหลือ: '+tire.qty+' เส้น';
+  } else info.style.display='none';
+}
+function calcSaleTotal() {
+  var q=parseFloat(document.getElementById('sale-qty').value)||0;
+  var p=parseFloat(document.getElementById('sale-price').value)||0;
+  document.getElementById('sale-total').value='฿ '+(q*p).toLocaleString('th-TH');
+}
+
+function loadRecvModels() {
+  var b=document.getElementById('recv-brand').value;
+  var map=getModelMap();
+  var el=document.getElementById('recv-model');
+  el.innerHTML='<option value="">เลือก...</option>';
+  if(map[b]) Object.keys(map[b]).sort().forEach(function(m){el.innerHTML+='<option>'+m+'</option>';});
+  document.getElementById('recv-size').innerHTML='<option value="">เลือกรุ่นก่อน</option>';
+}
+
+// ── Submit Sale ─────────────────────────────────────────
+function submitSale() {
+  var brand=document.getElementById('sale-brand').value;
+  var model=document.getElementById('sale-model').value;
+  var size=document.getElementById('sale-size').value;
+  var qty=parseInt(document.getElementById('sale-qty').value)||0;
+  var price=parseFloat(document.getElementById('sale-price').value)||0;
+  if(!brand||!model||!size||!qty||!price){showToast('กรุณากรอกข้อมูลให้ครบ');return;}
+
+  var tire=DB.stock.find(function(t){return t.brand===brand&&t.model===model&&t.size===size;});
+  if(!tire||tire.qty<qty){showToast('❌ สต็อกไม่พอ! มีเหลือ '+(tire?tire.qty:0)+' เส้น');return;}
+
+  // Deduct stock
+  tire.qty -= qty;
+  tire.status = tire.qty===0?'❌ หมด':tire.qty<=5?'🔶 น้อย':'✅ พร้อมขาย';
+
+  var total=qty*price;
+  var date=formatDateTH(new Date(document.getElementById('sale-date').value));
+  var saleRecord={id:Date.now(),date:date,brand:brand,model:model,size:size,
+    qty:qty,price:price,total:total,customer:document.getElementById('sale-customer').value,
+    plate:document.getElementById('sale-plate').value,inv:document.getElementById('sale-inv').value,
+    staff:document.getElementById('sale-staff').value};
+  DB.sales.push(saleRecord);
+
+  // Add to accounts
+  DB.accounts.push({id:Date.now()+1,date:date,type:"รายรับ",
+    name:"ขายยาง "+brand+" "+model+" "+size+" x"+qty+" เส้น"+(saleRecord.customer?" ("+saleRecord.customer+")":""),
+    amount:total,cat:"รายรับจากขายยาง",staff:saleRecord.staff});
+
+  saveDB();
+  closeModal('modal-sale');
+  renderHome(); renderStock(); renderSale(); renderAccount();
+  showToast('✅ บันทึกขาย '+brand+' '+model+' x'+qty+' เส้น = ฿'+total.toLocaleString('th-TH'));
+}
+
+// ── Submit Receive ──────────────────────────────────────
+function submitReceive() {
+  var brand=document.getElementById('recv-brand').value;
+  var model=document.getElementById('recv-model').value;
+  var size=document.getElementById('recv-size').value||'';
+  var qty=parseInt(document.getElementById('recv-qty').value)||0;
+  var cost=parseFloat(document.getElementById('recv-cost').value)||0;
+  var dot=document.getElementById('recv-dot').value;
+  if(!brand||!model||!qty){showToast('กรุณากรอกข้อมูลให้ครบ');return;}
+  if(dot&&dot.length!==4){showToast('DOT ต้องเป็น 4 หลัก เช่น 2426');return;}
+
+  var tire=DB.stock.find(function(t){return t.brand===brand&&t.model===model&&t.size===size;});
+  if(tire){ tire.qty+=qty; }
+  else {
+    var newId=Math.max.apply(null,DB.stock.map(function(t){return t.id;}))+1;
+    DB.stock.push({id:newId,brand:brand,model:model,size:size||brand+' '+model,
+      width:0,aspect:0,rim:0,qty:qty,cost:cost,status:'✅ พร้อมขาย'});
+  }
+  if(tire) { tire.status=tire.qty===0?'❌ หมด':tire.qty<=5?'🔶 น้อย':'✅ พร้อมขาย'; }
+
+  var date=formatDateTH(new Date(document.getElementById('recv-date').value));
+  if(cost>0) DB.accounts.push({id:Date.now(),date:date,type:"รายจ่าย",
+    name:"ต้นทุนรับยาง "+brand+" "+model+(size?" "+size:"")+" x"+qty+" เส้น",
+    amount:cost*qty,cat:"ต้นทุนสินค้า",staff:document.getElementById('recv-staff').value});
+
+  saveDB(); populateBrands();
+  closeModal('modal-receive');
+  renderHome(); renderStock(); renderAccount();
+  showToast('✅ รับยางเข้า '+brand+' '+model+' x'+qty+' เส้น');
+}
+
+// ── Submit Expense ──────────────────────────────────────
+function submitExpense() {
+  var name=document.getElementById('exp-name').value;
+  var amount=parseFloat(document.getElementById('exp-amount').value)||0;
+  if(!name||!amount){showToast('กรุณากรอกชื่อรายการและยอดเงิน');return;}
+  var date=formatDateTH(new Date(document.getElementById('exp-date').value));
+  DB.accounts.push({id:Date.now(),date:date,type:"รายจ่าย",name:name,amount:amount,
+    cat:document.getElementById('exp-cat').value,
+    staff:document.getElementById('exp-staff').value,
+    note:document.getElementById('exp-note').value});
+  saveDB();
+  closeModal('modal-expense');
+  renderHome(); renderAccount();
+  showToast('✅ บันทึกรายจ่าย '+name+' ฿'+amount.toLocaleString('th-TH'));
+}
+
+// ── Settings ────────────────────────────────────────────
+function saveSettings() {
+  localStorage.setItem('sheets_id',document.getElementById('sheets-id').value);
+  localStorage.setItem('api_key',document.getElementById('api-key').value);
+  showToast('✅ บันทึกการตั้งค่าแล้ว');
+}
+function loadSettings() {
+  var sid=localStorage.getItem('sheets_id'); if(sid) document.getElementById('sheets-id').value=sid;
+}
+function testConnection() {
+  var sid=document.getElementById('sheets-id').value;
+  if(!sid){showToast('กรุณาใส่ Google Sheets ID ก่อน');return;}
+  showToast('🔗 ทดสอบการเชื่อมต่อ... (ต้องตั้งค่า API Key ด้วย)');
+}
+function clearData() {
+  if(confirm('ล้างข้อมูลทั้งหมดในเครื่อง? (ข้อมูลใน Google Sheets จะยังอยู่)')) {
+    localStorage.removeItem('tirestock_db');
+    DB={stock:[],transactions:[],sales:[],accounts:[]};
+    init();
+    showToast('✅ ล้างข้อมูลแล้ว');
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────────
+function formatDateTH(d) {
+  if(typeof d==='string') d=new Date(d);
+  if(isNaN(d.getTime())) return '';
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+function showToast(msg) {
+  var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+// ── Start ────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
