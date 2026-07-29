@@ -860,6 +860,9 @@ var SAMPLE_ACCOUNTS = []
 
 // ── Init ────────────────────────────────────────────────
 function init() {
+  // แก้ค่า URL เก่าที่บันทึกผิด (ไม่มี https://) ให้อัตโนมัติ
+  var _oldU = localStorage.getItem('supa_url');
+  if(_oldU && _oldU !== SUPA_URL) localStorage.setItem('supa_url', SUPA_URL);
   DB = {stock:[], sales:[], accounts:[], transactions:[]};
 
   var today = new Date();
@@ -1365,18 +1368,21 @@ function submitExpense() {
 
 // ── Settings ────────────────────────────────────────────
 function saveSettings() {
-  var su = document.getElementById('supa-url').value.trim().replace(/\/+$/, '');
+  var su = normalizeSupaUrl(document.getElementById('supa-url').value);
   var sk = document.getElementById('supa-key').value.trim();
-  localStorage.setItem('supa_url', su);
-  localStorage.setItem('supa_key', sk);
-  SUPA_URL = su; SUPA_KEY = sk;
-  if(supaReady()) { startAutoSync(); syncFromSheets(); }
-  showToast('✅ บันทึกแล้ว' + (supaReady() ? ' กำลัง Sync...' : ''));
+  SUPA_URL = su || SUPA_URL_DEFAULT;
+  SUPA_KEY = sk || SUPA_KEY_DEFAULT;
+  localStorage.setItem('supa_url', SUPA_URL);
+  localStorage.setItem('supa_key', SUPA_KEY);
+  var e1 = document.getElementById('supa-url'); if(e1) e1.value = SUPA_URL;
+  var e2 = document.getElementById('supa-key'); if(e2) e2.value = SUPA_KEY;
+  startAutoSync(); syncFromSheets();
+  showToast('✅ บันทึกแล้ว กำลัง Sync...');
 }
 function loadSettings() {
   var sid=localStorage.getItem('sheets_id'); if(sid) document.getElementById('sheets-id').value=sid;
-  var su=localStorage.getItem('supa_url'); if(su){ var e1=document.getElementById('supa-url'); if(e1) e1.value=su; }
-  var sk=localStorage.getItem('supa_key'); if(sk){ var e2=document.getElementById('supa-key'); if(e2) e2.value=sk; }
+  var _e1=document.getElementById('supa-url'); if(_e1) _e1.value=SUPA_URL;
+  var _e2=document.getElementById('supa-key'); if(_e2) _e2.value=SUPA_KEY;
 }
 function testConnection() {
   if(!supaReady()){showToast('กรุณาใส่ Supabase URL และ anon key ก่อน');return;}
@@ -2091,8 +2097,17 @@ function initBrands() { renderBrands(); }
 
 
 // ── Sync with Google Sheets ──────────────────────────────
-var SUPA_URL = (localStorage.getItem("supa_url") || "").replace(/\/+$/, "");
-var SUPA_KEY = localStorage.getItem("supa_key") || "";
+var SUPA_URL_DEFAULT = "https://qxzfdeodkhnpfkzctzgm.supabase.co";
+var SUPA_KEY_DEFAULT = "sb_publishable_8HB1Ef01DZwmdVPxAHa50Q_8xpuvaNZ";
+function normalizeSupaUrl(u){
+  u = (u || "").trim();
+  if(!u) return "";
+  u = u.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
+  if(!/^https?:\/\//i.test(u)) u = "https://" + u;
+  return u;
+}
+var SUPA_URL = normalizeSupaUrl(localStorage.getItem("supa_url")) || SUPA_URL_DEFAULT;
+var SUPA_KEY = (localStorage.getItem("supa_key") || "").trim() || SUPA_KEY_DEFAULT;
 function supaReady(){ return SUPA_URL && SUPA_KEY; }
 function supaHeaders(){
   return {
@@ -2278,23 +2293,16 @@ function showUrlSetupPrompt() {
 }
 
 function saveUrlAndSync() {
-  var url = document.getElementById('setup-url-input').value.trim().replace(/\/+$/, '');
+  var url = normalizeSupaUrl(document.getElementById('setup-url-input').value);
   var key = document.getElementById('setup-key-input').value.trim();
-  if(!url || url.indexOf('supabase.co') === -1) {
-    alert('กรุณาวาง Supabase URL ที่ถูกต้อง\nเช่น https://xxxx.supabase.co');
-    return;
-  }
-  if(!key) {
-    alert('กรุณาวาง anon key ด้วย');
-    return;
-  }
-  SUPA_URL = url; SUPA_KEY = key;
-  localStorage.setItem('supa_url', url);
-  localStorage.setItem('supa_key', key);
+  SUPA_URL = url || SUPA_URL_DEFAULT;
+  SUPA_KEY = key || SUPA_KEY_DEFAULT;
+  localStorage.setItem('supa_url', SUPA_URL);
+  localStorage.setItem('supa_key', SUPA_KEY);
   var si = document.getElementById('supa-url');
   var ski = document.getElementById('supa-key');
-  if(si) si.value = url;
-  if(ski) ski.value = key;
+  if(si) si.value = SUPA_URL;
+  if(ski) ski.value = SUPA_KEY;
   document.getElementById('url-setup-modal').style.display = 'none';
   syncFromSheets();
   startAutoSync();
