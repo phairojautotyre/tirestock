@@ -348,21 +348,17 @@ body{font-family:-apple-system,Arial,sans-serif;background:#f0f2f5;color:var(--t
     <button class="btn-primary" style="background:#C55A11" onclick="saveCreditFee()">💾 บันทึก % บัตรเครดิต</button>
   </div>
   <div class="card">
-    <div class="card-title">🔗 เชื่อมต่อ Google Sheets (Sync อัตโนมัติ)</div>
+    <div class="card-title">⚡ เชื่อมต่อ Supabase (Sync อัตโนมัติ)</div>
     <div class="form-group">
-      <label class="form-label">Google Sheets ID</label>
-      <input class="form-input" id="sheets-id" placeholder="ใส่ ID จาก URL ของ Google Sheets" value="">
+      <label class="form-label">Supabase Project URL</label>
+      <input class="form-input" id="supa-url" placeholder="https://xxxx.supabase.co" value="">
     </div>
     <div class="form-group">
-      <label class="form-label">API Key (Google Sheets API)</label>
-      <input class="form-input" id="api-key" type="password" placeholder="AIza...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Apps Script URL (สำหรับ Sync)</label>
-      <input class="form-input" id="script-url" placeholder="https://script.google.com/macros/s/..." value="">
+      <label class="form-label">Supabase anon key</label>
+      <input class="form-input" id="supa-key" type="password" placeholder="eyJhbGci...">
     </div>
     <button class="btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
-    <button class="btn-primary" style="background:#34A853;margin-top:8px" onclick="syncFromSheets()">⬇️ ดึงข้อมูลจาก Sheets</button>
+    <button class="btn-primary" style="background:#34A853;margin-top:8px" onclick="syncFromSheets()">⬇️ ดึงข้อมูลจาก Supabase</button>
     <button class="btn-primary" style="background:#34A853;margin-top:8px" onclick="testConnection()">🔗 ทดสอบการเชื่อมต่อ</button>
   </div>
 
@@ -370,9 +366,9 @@ body{font-family:-apple-system,Arial,sans-serif;background:#f0f2f5;color:var(--t
     <div class="card-title">วิธีใช้งาน</div>
     <div style="font-size:13px;line-height:1.8;color:var(--text2)">
       <p>1. ติดตั้ง: กด Share → Add to Home Screen บน iPhone</p>
-      <p>2. ตั้งค่า: ใส่ Google Sheets ID และ API Key</p>
-      <p>3. ข้อมูลจะ sync กับ Google Sheets อัตโนมัติ</p>
-      <p>4. ใช้งานได้ offline (ข้อมูลเก็บในเครื่อง)</p>
+      <p>2. ตั้งค่า: ใส่ Supabase URL และ anon key</p>
+      <p>3. ข้อมูลเก็บใน Supabase — ทุกเครื่องเห็นตรงกัน</p>
+      <p>4. เปิดแอปทุกครั้งจะดึงข้อมูลล่าสุดอัตโนมัติ</p>
       <hr style="margin:10px 0;border:none;border-top:1px solid #eee">
       <p><strong>DOT format:</strong> 4 หลัก เช่น 2426 = สัปดาห์24 ปี2026</p>
     </div>
@@ -821,18 +817,25 @@ body{font-family:-apple-system,Arial,sans-serif;background:#f0f2f5;color:var(--t
   <div style="background:#fff;border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
     <div style="text-align:center;margin-bottom:16px">
       <div style="font-size:36px;margin-bottom:8px">🔗</div>
-      <div style="font-size:17px;font-weight:700;color:#1F3864;margin-bottom:4px">เชื่อมต่อ Google Sheets</div>
-      <div style="font-size:12px;color:#888;line-height:1.5">วาง Apps Script URL เพื่อ Sync ข้อมูลอัตโนมัติ<br>กด Deploy ใน Apps Script แล้ว Copy URL มาวางได้เลย</div>
+      <div style="font-size:17px;font-weight:700;color:#1F3864;margin-bottom:4px">เชื่อมต่อ Supabase</div>
+      <div style="font-size:12px;color:#888;line-height:1.5">วาง Project URL และ anon key จาก<br>Supabase → Project Settings → API</div>
     </div>
-    <input id="setup-url-input" type="url" placeholder="https://script.google.com/macros/s/..." 
+    <input id="setup-url-input" type="url" placeholder="https://xxxx.supabase.co"
+      style="width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;margin-bottom:10px;box-sizing:border-box;outline:none">
+    <input id="setup-key-input" type="password" placeholder="anon key (eyJhbGci...)"
       style="width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;margin-bottom:10px;box-sizing:border-box;outline:none">
     <button onclick="saveUrlAndSync()" style="width:100%;padding:13px;background:#2E75B6;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">💾 บันทึกและ Sync เลย</button>
     <button onclick="skipUrlSetup()" style="width:100%;padding:11px;background:#f5f5f5;color:#666;border:none;border-radius:10px;font-size:13px;cursor:pointer">ข้ามก่อน (ใช้แบบ Offline)</button>
   </div>
 </div>
-<div id="sync-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);align-items:center;justify-content:center;flex-direction:column;gap:12px">
-  <div style="width:48px;height:48px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite"></div>
-  <div style="color:#fff;font-size:14px;font-weight:600" id="sync-msg">กำลัง Sync...</div>
+<div id="sync-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="background:#fff;border-radius:16px;padding:20px 28px;min-width:240px;box-shadow:0 8px 32px rgba(0,0,0,0.18);text-align:center">
+    <div style="font-size:13px;font-weight:600;color:#1F3864;margin-bottom:12px" id="sync-overlay-msg">กำลังดึงข้อมูล...</div>
+    <div style="background:#E8F0FE;border-radius:99px;height:8px;overflow:hidden;margin-bottom:10px">
+      <div id="sync-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#2E75B6,#1a56db);border-radius:99px;transition:width 0.3s ease"></div>
+    </div>
+    <div style="font-size:11px;color:#888" id="sync-countdown"></div>
+  </div>
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
@@ -876,7 +879,7 @@ function init() {
   // ล้างข้อมูลเก่าทุกครั้ง แล้วดึงใหม่จาก Sheets
   DB = {stock:[], sales:[], accounts:[], transactions:[]};
   renderHome(); renderStock(); renderSale(); renderAccount();
-  if(!SCRIPT_URL) {
+  if(!supaReady()) {
     setTimeout(function(){ showUrlSetupPrompt(); }, 800);
   } else {
     setTimeout(function(){ syncFromSheets(); }, 500);
@@ -905,7 +908,7 @@ function showPage(name) {
     more:'ตั้งค่าและข้อมูล'
   }[name] || '';
   // Auto sync when switching to stock or account (max once per 2 min)
-  if(SCRIPT_URL && (name==='stock'||name==='account'||name==='home')) {
+  if(supaReady() && (name==='stock'||name==='account'||name==='home')) {
     var now = Date.now();
     if(now - _lastSyncTime > 2 * 60 * 1000) {
       _lastSyncTime = now;
@@ -942,8 +945,8 @@ function renderHome() {
       else expense+=a.amount;
     }
   });
-  document.getElementById('today-income').textContent = '฿ '+income.toLocaleString('th-TH');
-  document.getElementById('today-expense').textContent = '฿ '+expense.toLocaleString('th-TH');
+  document.getElementById('today-income').textContent = '฿ '+(Number(income)||0).toLocaleString('th-TH');
+  document.getElementById('today-expense').textContent = '฿ '+(Number(expense)||0).toLocaleString('th-TH');
   document.getElementById('today-profit').textContent = '฿ '+(income-expense).toLocaleString('th-TH');
 
   var lowItems = DB.stock.filter(function(t){return t.qty>0&&t.qty<=5;});
@@ -1044,9 +1047,9 @@ function renderSale() {
 // ── Render Account ──────────────────────────────────────
 function renderAccount() {
   var income=0,expense=0;
-  DB.accounts.forEach(function(a){ if(a.type==="รายรับ") income+=a.amount; else expense+=a.amount; });
-  document.getElementById('acc-income').textContent = '฿'+income.toLocaleString('th-TH');
-  document.getElementById('acc-expense').textContent = '฿'+expense.toLocaleString('th-TH');
+  DB.accounts.forEach(function(a){ var amt=Number(a.amount)||0; if(a.type==="รายรับ") income+=amt; else expense+=amt; });
+  document.getElementById('acc-income').textContent = '฿'+(Number(income)||0).toLocaleString('th-TH');
+  document.getElementById('acc-expense').textContent = '฿'+(Number(expense)||0).toLocaleString('th-TH');
   document.getElementById('acc-profit').textContent = '฿'+(income-expense).toLocaleString('th-TH');
 
   var html='';
@@ -1056,10 +1059,10 @@ function renderAccount() {
     var sign=a.type==="รายรับ"?"+":"-";
     html+='<div class="tx-item '+cls+'">' +
       '<div class="tx-header"><span class="tx-name" style="font-size:12px">'+a.name+'</span>' +
-      '<span class="tx-amount '+(a.type==="รายรับ"?"plus":"minus")+'">'+sign+'฿'+a.amount.toLocaleString('th-TH')+'</span></div>' +
+      '<span class="tx-amount '+(a.type==="รายรับ"?"plus":"minus")+'">'+sign+'฿'+(Number(a.amount)||0).toLocaleString('th-TH')+'</span></div>' +
       '<div class="tx-meta">'+a.date+' | '+a.cat+
       (a.payment?' | '+(a.payment==='cash'?'💵 เงินสด':a.payment==='transfer'?'📱 โอน':'💳 บัตร'):'')+
-      (a.netReceived&&a.payment==='credit'?' (สุทธิ ฿'+a.netReceived.toLocaleString('th-TH',{maximumFractionDigits:0})+')':'')+
+      (a.netReceived&&a.payment==='credit'?' (สุทธิ ฿'+(Number(a.netReceived)||0).toLocaleString('th-TH',{maximumFractionDigits:0})+')':'')+
       (a.staff?' | '+a.staff:'')+'</div></div>';
   });
   if(!html) html='<div class="empty"><div class="empty-icon">💰</div><p>ยังไม่มีรายการ</p></div>';
@@ -1323,7 +1326,7 @@ function submitReceive() {
     return;
   }
   if(dot&&dot.length!==4){showToast('DOT ต้องเป็น 4 หลัก เช่น 2426');return;}
-  if(!SCRIPT_URL){showToast('⚠️ กรุณาตั้งค่า Script URL ก่อน');return;}
+  if(!supaReady()){showToast('⚠️ กรุณาตั้งค่า Supabase ก่อน');return;}
 
   showSyncLoading('กำลังบันทึก...');
   syncToSheets('receive', {
@@ -1362,22 +1365,27 @@ function submitExpense() {
 
 // ── Settings ────────────────────────────────────────────
 function saveSettings() {
-  localStorage.setItem('sheets_id',document.getElementById('sheets-id').value);
-  localStorage.setItem('api_key',document.getElementById('api-key').value);
-  var su = document.getElementById('script-url').value.trim();
-  localStorage.setItem('script_url', su);
-  SCRIPT_URL = su;
-  if(su) { startAutoSync(); syncFromSheets(); }
-  showToast('✅ บันทึกแล้ว' + (su ? ' กำลัง Sync...' : ''));
+  var su = document.getElementById('supa-url').value.trim().replace(/\/+$/, '');
+  var sk = document.getElementById('supa-key').value.trim();
+  localStorage.setItem('supa_url', su);
+  localStorage.setItem('supa_key', sk);
+  SUPA_URL = su; SUPA_KEY = sk;
+  if(supaReady()) { startAutoSync(); syncFromSheets(); }
+  showToast('✅ บันทึกแล้ว' + (supaReady() ? ' กำลัง Sync...' : ''));
 }
 function loadSettings() {
   var sid=localStorage.getItem('sheets_id'); if(sid) document.getElementById('sheets-id').value=sid;
-  var su=localStorage.getItem('script_url'); if(su){ document.getElementById('script-url').value=su; SCRIPT_URL=su; }
+  var su=localStorage.getItem('supa_url'); if(su){ var e1=document.getElementById('supa-url'); if(e1) e1.value=su; }
+  var sk=localStorage.getItem('supa_key'); if(sk){ var e2=document.getElementById('supa-key'); if(e2) e2.value=sk; }
 }
 function testConnection() {
-  var sid=document.getElementById('sheets-id').value;
-  if(!sid){showToast('กรุณาใส่ Google Sheets ID ก่อน');return;}
-  showToast('🔗 ทดสอบการเชื่อมต่อ... (ต้องตั้งค่า API Key ด้วย)');
+  if(!supaReady()){showToast('กรุณาใส่ Supabase URL และ anon key ก่อน');return;}
+  showToast('🔗 กำลังทดสอบ...');
+  fetch(SUPA_URL + '/rest/v1/stock?select=id&limit=1', {headers: supaHeaders()})
+  .then(function(r){
+    if(r.ok) showToast('✅ เชื่อมต่อ Supabase สำเร็จ!');
+    else showToast('❌ เชื่อมต่อไม่ได้ (HTTP '+r.status+') — ตรวจ URL/key และรัน SQL setup');
+  }).catch(function(){ showToast('❌ เชื่อมต่อไม่ได้ — ตรวจ URL'); });
 }
 function clearData() {
   if(confirm('รีเซ็ตและดึงข้อมูลใหม่จาก Sheets?')) {
@@ -2083,96 +2091,182 @@ function initBrands() { renderBrands(); }
 
 
 // ── Sync with Google Sheets ──────────────────────────────
-var SCRIPT_URL = localStorage.getItem("script_url") || "";
+var SUPA_URL = (localStorage.getItem("supa_url") || "").replace(/\/+$/, "");
+var SUPA_KEY = localStorage.getItem("supa_key") || "";
+function supaReady(){ return SUPA_URL && SUPA_KEY; }
+function supaHeaders(){
+  return {
+    "apikey": SUPA_KEY,
+    "Authorization": "Bearer " + SUPA_KEY,
+    "Content-Type": "application/json"
+  };
+}
 
 function showSyncLoading(msg) {
-  var el = document.getElementById('sync-overlay');
-  var msgEl = document.getElementById('sync-msg');
-  if(el){ el.style.display='flex'; if(msgEl) msgEl.textContent=msg||'กำลัง Sync...'; }
+  var el=document.getElementById('sync-overlay');
+  var msgEl=document.getElementById('sync-overlay-msg');
+  var bar=document.getElementById('sync-progress-bar');
+  var cd=document.getElementById('sync-countdown');
+  if(!el) return;
+  el.style.display='flex';
+  if(msgEl) msgEl.textContent=msg||'กำลังดึงข้อมูล...';
+  if(bar) bar.style.width='0%';
+  if(cd) cd.textContent='';
+  var pct=0;
+  clearInterval(window._syncTimer);
+  window._syncTimer=setInterval(function(){
+    pct+=3;
+    if(bar) bar.style.width=Math.min(pct,90)+'%';
+    if(cd) cd.textContent=pct<90?'ประมาณ '+Math.ceil((90-pct)/30)+' วินาที':'กำลังประมวลผล...';
+    if(pct>=90) clearInterval(window._syncTimer);
+  },100);
 }
 function hideSyncLoading() {
-  var el = document.getElementById('sync-overlay');
-  if(el) el.style.display='none';
+  clearInterval(window._syncTimer);
+  var bar=document.getElementById('sync-progress-bar');
+  var cd=document.getElementById('sync-countdown');
+  if(bar) bar.style.width='100%';
+  if(cd) cd.textContent='✅ เสร็จแล้ว';
+  setTimeout(function(){
+    var el=document.getElementById('sync-overlay');
+    if(el) el.style.display='none';
+    if(bar) bar.style.width='0%';
+  },400);
 }
-
 function syncToSheets(action, data, callback) {
-  if (!SCRIPT_URL) {
+  if (!supaReady()) {
+    showToast('⚠️ กรุณาตั้งค่า Supabase ก่อน');
     if(callback) callback(false);
     return;
   }
-  var cbName = '_cb' + Date.now();
-  var params = '?action=' + encodeURIComponent(action) + '&callback=' + cbName;
-  Object.keys(data).forEach(function(k){
-    var v = data[k];
-    if(v !== undefined && v !== null && v !== '')
-      params += '&' + k + '=' + encodeURIComponent(String(v));
-  });
-  var done = false;
-  window[cbName] = function(res){
-    done = true;
-    hideSyncLoading();
-    delete window[cbName];
-    var el = document.getElementById(cbName);
-    if(el) el.parentNode.removeChild(el);
-    if(callback) callback(res && res.status==='ok', res);
-    else showToast(res && res.status==='ok' ? '☁️ บันทึกลง Sheets แล้ว' : '❌ '+(res&&res.message||'ผิดพลาด'));
-  };
-  var sc = document.createElement('script');
-  sc.id = cbName;
-  sc.src = SCRIPT_URL + params;
-  sc.onerror = function(){
-    if(done) return;
-    hideSyncLoading();
-    delete window[cbName];
-    this.parentNode.removeChild(this);
+  var rpc = '', body = {};
+  if (action === 'receive') {
+    var sz = String(data.size || '');
+    var sl = sz.indexOf('/'), rp = sz.toUpperCase().indexOf('R');
+    rpc = 'receive_tire';
+    body = {
+      p_brand: data.brand || '', p_model: data.model || '', p_size: sz,
+      p_width:  sl > 0 ? (Number(sz.substring(0, sl)) || 0) : 0,
+      p_aspect: (sl > 0 && rp > sl) ? (Number(sz.substring(sl+1, rp)) || 0) : 0,
+      p_rim:    rp > 0 ? (Number(sz.substring(rp+1)) || 0) : 0,
+      p_qty: Number(data.qty) || 0, p_cost: Number(data.cost) || 0,
+      p_dot: data.dot || '', p_date: data.date || '',
+      p_staff: data.staff || '', p_inv: data.inv || ''
+    };
+  } else if (action === 'sale') {
+    rpc = 'sell_tire';
+    body = {
+      p_brand: data.brand || '', p_model: data.model || '', p_size: data.size || '',
+      p_qty: Number(data.qty) || 0, p_price: Number(data.price) || 0,
+      p_date: data.date || '', p_customer: data.customer || '',
+      p_phone: data.phone || '', p_plate: data.plate || '',
+      p_inv: data.inv || '', p_staff: data.staff || '',
+      p_payment: data.payment || 'cash',
+      p_received: Number(data.received) || 0,
+      p_sale_type: data.saleType || 'stock',
+      p_ext_cost: Number(data.extCost) || 0
+    };
+  } else if (action === 'expense') {
+    rpc = 'add_expense';
+    body = {
+      p_name: data.name || '', p_amount: Number(data.amount) || 0,
+      p_cat: data.cat || '', p_date: data.date || '',
+      p_staff: data.staff || '', p_note: data.note || ''
+    };
+  } else {
     if(callback) callback(false);
-    showToast('❌ เชื่อมต่อ Sheets ไม่ได้');
-  };
-  document.head.appendChild(sc);
+    return;
+  }
+  fetch(SUPA_URL + '/rest/v1/rpc/' + rpc, {
+    method: 'POST',
+    headers: supaHeaders(),
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); })
+  .then(function(res){
+    hideSyncLoading();
+    var isOk = res && res.status === 'ok';
+    if(callback) callback(isOk, res);
+    else showToast(isOk ? '☁️ บันทึกแล้ว' : '❌ ' + (res.message || JSON.stringify(res).substring(0, 80)));
+  }).catch(function(e){
+    hideSyncLoading();
+    console.error('syncToSheets error:', e);
+    if(callback) callback(false);
+    showToast('❌ เชื่อมต่อ Supabase ไม่ได้');
+  });
 }
-function syncFromSheets() {
-  if (!SCRIPT_URL) { showUrlSetupPrompt(); return; }
-  showSyncLoading('กำลังดึงข้อมูลจาก Sheets...');
-  var statusEl = document.getElementById('sync-status');
-  if(statusEl){ statusEl.style.display='block'; statusEl.textContent='⏳ กำลัง Sync...'; }
-  var cbName = '_sync' + Date.now();
-  window[cbName] = function(res){
-    hideSyncLoading();
-    delete window[cbName];
-    var el = document.getElementById(cbName);
-    if(el) el.parentNode.removeChild(el);
-    if(res && res.stock && res.stock.length > 0){
-      DB.stock = res.stock;
-      DB.sales = res.sales || [];
-      DB.accounts = res.accounts || [];
-      renderHome(); renderStock(); renderBrands(); populateBrands();
-      renderSale(); renderAccount();
-      var msg = '✅ Sync สำเร็จ! '+res.stock.length+' รายการ';
+function applySyncData(res, statusEl) {
+  if (res && res.status === 'ok') {
+    DB.stock = (res.stock || []).map(function(t){
+      t.qty = Number(t.qty) || 0;
+      t.cost = Number(t.cost) || 0;
+      t.price = Number(t.price) || 0;
+      t.status = t.qty === 0 ? '❌ หมด' : t.qty <= 2 ? '⚠️ ใกล้หมด' : t.qty <= 5 ? '🔶 น้อย' : '✅ พร้อมขาย';
+      return t;
+    });
+    DB.sales = (res.sales || []).map(function(s){
+      s.qty = Number(s.qty) || 0;
+      s.price = Number(s.price) || 0;
+      s.total = Number(s.total) || 0;
+      s.saleType = s.sale_type || s.saleType || 'stock';
+      return s;
+    });
+    DB.accounts = (res.accounts || []).map(function(a){
+      a.amount = Number(a.amount) || 0;
+      a.netReceived = Number(a.net_received) || 0;
+      return a;
+    });
+    renderHome(); renderStock(); renderBrands(); populateBrands();
+    renderSale(); renderAccount();
+    if (DB.stock.length > 0) {
+      var msg = '✅ Sync สำเร็จ! ' + DB.stock.length + ' รายการ';
       showToast(msg);
-      if(statusEl){ statusEl.textContent=msg; statusEl.style.background='#E6F4EA'; statusEl.style.color='#276221'; }
+      if(statusEl){ statusEl.textContent = msg; statusEl.style.background = '#E6F4EA'; statusEl.style.color = '#276221'; }
     } else {
-      DB = {stock:[], sales:[], accounts:[], transactions:[]};
-      renderHome(); renderStock(); renderSale(); renderAccount(); renderBrands();
-      var m2 = 'ℹ️ Sheets ว่างเปล่า — เริ่มบันทึกข้อมูลได้เลย';
+      var m2 = 'ℹ️ ฐานข้อมูลว่าง — เริ่มบันทึกข้อมูลได้เลย';
       showToast(m2);
-      if(statusEl){ statusEl.textContent=m2; statusEl.style.background='#E8F0FE'; statusEl.style.color='#1a56db'; }
+      if(statusEl){ statusEl.textContent = m2; statusEl.style.background = '#E8F0FE'; statusEl.style.color = '#1a56db'; }
     }
-  };
-  var sc = document.createElement('script');
-  sc.id = cbName;
-  sc.src = SCRIPT_URL + '?action=getStock&callback=' + cbName + '&t=' + Date.now();
-  sc.onerror = function(){
-    hideSyncLoading();
-    delete window[cbName];
-    this.parentNode.removeChild(this);
-    var m3 = '❌ Sync ล้มเหลว — ตรวจสอบ URL และ Deploy';
+  } else {
+    var m3 = '❌ ดึงข้อมูลไม่ได้ — ตรวจสอบว่ารัน SQL setup แล้ว';
     showToast(m3);
-    if(statusEl){ statusEl.textContent=m3; statusEl.style.background='#FCE8E6'; statusEl.style.color='#C62828'; }
-  };
-  document.head.appendChild(sc);
+    if(statusEl){ statusEl.textContent = m3; statusEl.style.background = '#FCE8E6'; statusEl.style.color = '#C62828'; }
+  }
+}
+
+function syncFromSheets() {
+  if (!supaReady()) { showUrlSetupPrompt(); return; }
+  showSyncLoading('กำลังดึงข้อมูล...');
+  var statusEl = document.getElementById('sync-status');
+  if(statusEl){ statusEl.style.display = 'block'; statusEl.textContent = '⏳ กำลัง Sync...'; }
+  fetch(SUPA_URL + '/rest/v1/rpc/get_all_data', {
+    method: 'POST',
+    headers: supaHeaders(),
+    body: '{}'
+  }).then(function(r){ return r.json(); })
+  .then(function(res){
+    hideSyncLoading();
+    applySyncData(res, statusEl);
+  }).catch(function(e){
+    hideSyncLoading();
+    console.error('sync error:', e);
+    var m3 = '❌ Sync ล้มเหลว — ตรวจสอบ URL/key';
+    showToast(m3);
+    if(statusEl){ statusEl.textContent = m3; statusEl.style.background = '#FCE8E6'; statusEl.style.color = '#C62828'; }
+  });
+}
+function syncFromSheetsSilent() {
+  if (!supaReady()) return;
+  fetch(SUPA_URL + '/rest/v1/rpc/get_all_data', {
+    method: 'POST',
+    headers: supaHeaders(),
+    body: '{}'
+  }).then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res && res.status === 'ok') applySyncData(res, null);
+  }).catch(function(){});
 }
 function startAutoSync() {
-  if (!SCRIPT_URL) return;
+  if (!supaReady()) return;
   setInterval(function(){
     if(document.visibilityState === 'visible') syncFromSheets();
   }, 5 * 60 * 1000);
@@ -2184,22 +2278,28 @@ function showUrlSetupPrompt() {
 }
 
 function saveUrlAndSync() {
-  var url = document.getElementById('setup-url-input').value.trim();
-  if(!url || !url.startsWith('https://script.google.com')) {
-    alert('กรุณาวาง URL ที่ถูกต้อง\nต้องขึ้นต้นด้วย https://script.google.com');
+  var url = document.getElementById('setup-url-input').value.trim().replace(/\/+$/, '');
+  var key = document.getElementById('setup-key-input').value.trim();
+  if(!url || url.indexOf('supabase.co') === -1) {
+    alert('กรุณาวาง Supabase URL ที่ถูกต้อง\nเช่น https://xxxx.supabase.co');
     return;
   }
-  SCRIPT_URL = url;
-  localStorage.setItem('script_url', url);
-  // Update settings page input too
-  var settingsInput = document.getElementById('script-url');
-  if(settingsInput) settingsInput.value = url;
-  document.getElementById('url-setup-modal').style.display='none';
+  if(!key) {
+    alert('กรุณาวาง anon key ด้วย');
+    return;
+  }
+  SUPA_URL = url; SUPA_KEY = key;
+  localStorage.setItem('supa_url', url);
+  localStorage.setItem('supa_key', key);
+  var si = document.getElementById('supa-url');
+  var ski = document.getElementById('supa-key');
+  if(si) si.value = url;
+  if(ski) ski.value = key;
+  document.getElementById('url-setup-modal').style.display = 'none';
   syncFromSheets();
   startAutoSync();
-  showToast('✅ บันทึก URL แล้ว กำลัง Sync...');
+  showToast('✅ บันทึกแล้ว กำลัง Sync...');
 }
-
 function skipUrlSetup() {
   document.getElementById('url-setup-modal').style.display='none';
   // script_url_skipped removed
